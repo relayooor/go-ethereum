@@ -1,6 +1,9 @@
 `production` branch contains version deployed at relayooor.wtf
+
 Intoduces method `flashbots_validateBuilderSubmissionV1` which validates increase in coinbase balance for all block submissions.
+
 This is just a clone of [flashbot's validation](https://github.com/flashbots/block-validation-geth) with tracing/blacklisting removed as it's rather slow and unnecessary.
+
 Logic allows to send to pay block reward via last transaction or directly via `coinbase` with belief that privacy is more important than edge case such approach produces.
 
 ## Go Ethereum
