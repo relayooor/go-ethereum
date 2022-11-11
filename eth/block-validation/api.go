@@ -40,7 +40,12 @@ func NewBlockValidationAPI(eth *eth.Ethereum) *BlockValidationAPI {
 	}
 }
 
-func (api *BlockValidationAPI) ValidateBuilderSubmissionV1(params *boostTypes.BuilderSubmitBlockRequest) error {
+type BuilderBlockValidationRequest struct {
+	boostTypes.BuilderSubmitBlockRequest
+	RegisteredGasLimit uint64 `json:"registered_gas_limit,string"`
+}
+
+func (api *BlockValidationAPI) ValidateBuilderSubmissionV1(params *BuilderBlockValidationRequest) error {
 	// TODO: fuzztest, make sure the validation is sound
 	// TODO: handle context!
 
@@ -72,7 +77,7 @@ func (api *BlockValidationAPI) ValidateBuilderSubmissionV1(params *boostTypes.Bu
 	feeRecipient := common.BytesToAddress(params.Message.ProposerFeeRecipient[:])
 	expectedProfit := params.Message.Value.BigInt()
 
-	err = api.eth.BlockChain().ValidatePayload(block, feeRecipient, expectedProfit, *api.eth.BlockChain().GetVMConfig())
+	err = api.eth.BlockChain().ValidatePayload(block, feeRecipient, expectedProfit, params.RegisteredGasLimit, *api.eth.BlockChain().GetVMConfig())
 	if err != nil {
 		log.Error("invalid payload", "hash", payload.BlockHash.String(), "number", payload.BlockNumber, "parentHash", payload.ParentHash.String(), "err", err)
 		return err
