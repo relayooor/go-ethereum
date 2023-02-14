@@ -15,8 +15,6 @@ import (
 	boostTypes "github.com/flashbots/go-boost-utils/types"
 )
 
-
-
 // Register adds catalyst APIs to the full node.
 func Register(stack *node.Node, backend *eth.Ethereum, ctx *cli.Context) error {
 	stack.RegisterAPIs([]rpc.API{
@@ -48,6 +46,7 @@ type BuilderBlockValidationRequest struct {
 func (api *BlockValidationAPI) ValidateBuilderSubmissionV1(params *BuilderBlockValidationRequest) error {
 	// TODO: fuzztest, make sure the validation is sound
 	// TODO: handle context!
+	log.Info("handling ValidateBuilderSubmissionV1")
 
 	if params.ExecutionPayload == nil {
 		return errors.New("nil execution payload")
