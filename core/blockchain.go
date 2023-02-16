@@ -2438,14 +2438,13 @@ func (bc *BlockChain) ValidatePayload(block *types.Block, feeRecipient common.Ad
 	current := bc.CurrentBlock()
 	reorg, err := bc.forker.ReorgNeeded(current.Header(), header)
 	if err == nil && reorg {
-		return errors.New("block requires a reorg")
+		return fmt.Errorf("block requires a reorg: current header: %+v, new header: %+v", current.Header(), header)
 	}
 
 	parent := bc.GetHeader(block.ParentHash(), block.NumberU64()-1)
 	if parent == nil {
 		return errors.New("parent not found")
 	}
-
 
 	calculatedGasLimit := utils.CalcGasLimit(parent.GasLimit, registeredGasLimit)
 	if calculatedGasLimit != header.GasLimit {

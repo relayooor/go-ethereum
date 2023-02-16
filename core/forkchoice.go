@@ -19,6 +19,7 @@ package core
 import (
 	crand "crypto/rand"
 	"errors"
+	"fmt"
 	"math/big"
 	mrand "math/rand"
 
@@ -79,13 +80,15 @@ func (f *ForkChoice) ReorgNeeded(current *types.Header, header *types.Header) (b
 		localTD  = f.chain.GetTd(current.Hash(), current.Number.Uint64())
 		externTd = f.chain.GetTd(header.Hash(), header.Number.Uint64())
 	)
+	log.Info(fmt.Sprintf("*** localTd, externTd : %v, %v", localTD.String(), externTd.String()))
 	if localTD == nil || externTd == nil {
-		return false, errors.New("missing td")
+		return false, errors.New("*** missing td")
 	}
 	// Accept the new header as the chain head if the transition
 	// is already triggered. We assume all the headers after the
 	// transition come from the trusted consensus layer.
 	if ttd := f.chain.Config().TerminalTotalDifficulty; ttd != nil && ttd.Cmp(externTd) <= 0 {
+		log.Info(fmt.Sprintf("*** ttd, externTd %v, %v", ttd.String(), externTd.String()))
 		return true, nil
 	}
 	// If the total difficulty is higher than our known, add it to the canonical chain
@@ -94,6 +97,7 @@ func (f *ForkChoice) ReorgNeeded(current *types.Header, header *types.Header) (b
 	reorg := externTd.Cmp(localTD) > 0
 	if !reorg && externTd.Cmp(localTD) == 0 {
 		number, headNumber := header.Number.Uint64(), current.Number.Uint64()
+		log.Info(fmt.Sprintf("*** number, headNumber %d, %d", number, headNumber))
 		if number < headNumber {
 			reorg = true
 		} else if number == headNumber {
@@ -101,6 +105,7 @@ func (f *ForkChoice) ReorgNeeded(current *types.Header, header *types.Header) (b
 			if f.preserve != nil {
 				currentPreserve, externPreserve = f.preserve(current), f.preserve(header)
 			}
+			log.Info(fmt.Sprintf("*** currentPreserve, externPreserve %v, %v", currentPreserve, externPreserve))
 			reorg = !currentPreserve && (externPreserve || f.rand.Float64() < 0.5)
 		}
 	}
